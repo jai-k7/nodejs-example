@@ -35,6 +35,12 @@ jobs:
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
-
-
         
+    - name: Create vcluster for preview environment
+      uses: JimCronqvist/action-ssh@master
+      with:
+        hosts: 'ubuntu@35.172.222.101'
+        privateKey: ${{ secrets.PRIVATE_KEY }}
+        command: |
+          vcluster create nodejs-preview-${{ github.event.pull_request.number }}
+    

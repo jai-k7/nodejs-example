@@ -39,8 +39,23 @@ jobs:
     - name: Create vcluster for preview environment
       uses: JimCronqvist/action-ssh@master
       with:
-        hosts: 'ubuntu@35.172.222.101'
+        hosts: 'ubuntu@34.228.199.30'
         privateKey: ${{ secrets.PRIVATE_KEY }}
         command: |
           vcluster create nodejs-preview-${{ github.event.pull_request.number }}
+
+    - name: update image in deployment
+      run: |
+        sed -i 's/nodejs-app-image/$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG/g' kubernetes/app-deployment.yaml
+   
+    - name: Deploy preview env
+      uses: JimCronqvist/action-ssh@master
+      with:
+        hosts: 'ubuntu@34.228.199.30'
+        privateKey: ${{ secrets.PRIVATE_KEY }}
+        command: |
+          vcluster connect vcluster create nodejs-preview-${{ github.event.pull_request.number }}
+          kubectl apply -f ./kubernetes
+          
+          
     
